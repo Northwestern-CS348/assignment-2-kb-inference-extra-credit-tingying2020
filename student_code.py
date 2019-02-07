@@ -129,6 +129,7 @@ class KnowledgeBase(object):
         ####################################################
         # Implementation goes here
         # Not required for the extra credit assignment
+        
 
     def kb_explain(self, fact_or_rule):
         """
@@ -142,7 +143,95 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+        if isinstance(fact_or_rule, Fact):
+            if fact_or_rule not in self.facts:
+                return "Fact is not in the KB"
+            else:
+                ind = self.facts.index(fact_or_rule)
+                fact_or_rule = self.facts[ind]
+                stringOut = fact_or_rule.name + ": " + str(fact_or_rule.statement)
+                if fact_or_rule.supported_by != []:
+                    stringOut += "\n"            
+                    for supported in fact_or_rule.supported_by:
+                        #print(supported)
+                        #print("fact: =======",supported[0].statement)
+                        stringOut += self.kb_printSupBy(supported, 2)
+                else:
+                    stringOut += " ASSERTED" + "\n"
+                return stringOut    
 
+        elif isinstance(fact_or_rule, Rule):
+            if fact_or_rule not in self.rules:
+                return "Rule is not in the KB"
+            else:
+                ind = self.rules.index(fact_or_rule)
+                fact_or_rule = self.rules[ind]
+                stringOut = "rule: " + "("
+                for j in range(len(fact_or_rule.lhs)):
+                    stringOut += str(fact_or_rule.lhs[j])
+                    if j != len(fact_or_rule.lhs) - 1:
+                        stringOut += ", "
+                stringOut += ")" + " -> " + str(fact_or_rule.rhs)
+                if fact_or_rule.supported_by != []:
+                    stringOut += "\n"
+                    for supported in fact_or_rule.supported_by:
+                        stringOut += self.kb_printSupBy(supported, 2)
+                else:
+                    stringOut += " ASSERTED" + "\n"
+                return stringOut
+        else:
+            return False
+
+    def kb_printSpace(self, spaceNum):
+        space = ""
+        for i in range(spaceNum):
+            space += " "
+        return space
+
+    def kb_printSupBy(self, supported, spaceNum):
+        stringRet = ""
+        '''
+        print(len(supported)//2, len(supported))
+        for i in supported:
+            print("123321")
+            print(i)
+        '''
+        stringRet += self.kb_printSpace(spaceNum)
+        spaceNum += 2
+        stringRet += "SUPPORTED BY" + "\n"
+        stringRet += self.kb_printSpace(spaceNum)
+        stringRet += "fact: " + str(supported[0].statement)
+        #print("fact: -------", supported[0].statement)
+        if supported[0].asserted:
+            stringRet += " ASSERTED"
+            stringRet += "\n"
+        else:
+            ind = self.facts.index(supported[0])
+            stringRet += "\n"
+            fact = self.facts[ind]
+            for supported1 in fact.supported_by:
+                stringRet += self.kb_printSupBy(supported1, spaceNum+2)
+                
+        stringRet += self.kb_printSpace(spaceNum)
+        stringRet += "rule: " + "("
+        for j in range(len(supported[1].lhs)):
+            stringRet += str(supported[1].lhs[j])
+            if j != len(supported[1].lhs) - 1:
+                stringRet += ", "
+        stringRet += ")" + " -> " + str(supported[1].rhs)
+        if supported[1].asserted:
+            stringRet += " ASSERTED"
+            stringRet += "\n"
+        else:
+            ind = self.rules.index(supported[1])
+            stringRet += "\n"
+            rule = self.rules[ind]
+            for supported1 in rule.supported_by:
+                stringRet += self.kb_printSupBy(supported1, spaceNum+2)
+            
+        #spaceNum += 2
+
+        return stringRet
 
 class InferenceEngine(object):
     def fc_infer(self, fact, rule, kb):
@@ -161,3 +250,4 @@ class InferenceEngine(object):
         ####################################################
         # Implementation goes here
         # Not required for the extra credit assignment
+        
